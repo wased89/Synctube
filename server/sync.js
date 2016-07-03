@@ -9,12 +9,22 @@ var safesocket = require('safesocket');
 var sockets = require('./sockets');
 
 /**
+ * Fox Vars
+ */
+var rooms = {};
+
+/**
  * Socket events.
  */
 
 sockets.on('listen', function (io) {
 
 	datastore.on('room', function (room, event, args) {
+		
+		rooms[room].hostID = "";
+		rooms[room].isLocked = false;
+		rooms[room].users = [];
+		
 		if (event == 'state') {
 			io.sockets.in(room).emit('state', args[0]);
 		} else if (event == 'put') {
@@ -42,32 +52,41 @@ sockets.on('listen', function (io) {
 	function join (socket, name) {
 
 		socket.join(name);
-
+		
+		rooms[name].users.push(socket.id);
+		
 		socket.on('disconnect', function () {
+			rooms[name].users.splice(rooms[name].users.indexOf(socket.id), 1);
 			datastore.leave(name);
+			makeNewHost(name);
 		});
 
 		socket.on('add', safesocket(2, function (type, id, callback) {
 			media.getLength(type, id, function (err, length) {
 				if (err) { return callback(err); }
+				if (rooms[name].isLocked) { return callback("Error: Locked Room Error"); }
 				var video = { id: id, length: length, type: type };
 				datastore.addVideo(name, video, callback);
 			});
 		}));
 
 		socket.on('delete', safesocket(1, function (key, callback) {
+			if (rooms[name].isLocked) { return callback("Error: Locked Room Error"); }
 			datastore.deleteVideo(name, key, callback);
 		}));
 
 		socket.on('move', safesocket(2, function (key, beforeKey, callback) {
+			if (rooms[name].isLocked) { return callback("Error: Locked Room Error"); }
 			datastore.moveVideo(name, key, beforeKey, callback);
 		}));
 
 		socket.on('shuffle', safesocket(0, function (callback) {
+			if (rooms[name].isLocked) { return callback("Error: Locked Room Error"); }
 			datastore.shufflePlaylist(name, callback);
 		}));
 
 		socket.on('cue', safesocket(1, function (key, callback) {
+			if (rooms[name].isLocked) { return callback("Error: Locked Room Error"); }
 			datastore.playVideo(name, key, callback);
 		}));
 
@@ -82,6 +101,12 @@ sockets.on('listen', function (io) {
 		socket.on('pause', safesocket(0, function (callback) {
 			datastore.setPlaying(name, false, callback);
 		}));
+		
+		socket.on('lock', safesocket(0, function (callback)
+		{
+			if(socket.id == hostID) { rooms[name].isLocked = !rooms[name].isLocked; }
+			else {return callback("Error: NotHost/Leader. Cannot lock room.");}
+		}));
 
 		async.parallel({
 			playlist: async.apply(datastore.getPlaylist, name),
@@ -93,7 +118,12 @@ sockets.on('listen', function (io) {
 			socket.emit('state', result.state);
 			socket.emit('users', result.users);
 		});
+		
+		makeNewHost(name);
 
 	}
-
+	function makeNewHost(name)
+	{
+		hostID = rooms[name].users[0];
+	}
 });
