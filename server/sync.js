@@ -56,7 +56,7 @@ sockets.on('listen', function (io) {
 		rooms[name].users.push(socket.id);
 		
 		socket.on('disconnect', function () {
-			rooms[name].users.splice(rooms[name].users.indexOf(socket.id), 1;
+			rooms[name].users.splice(rooms[name].users.indexOf(socket.id), 1);
 			datastore.leave(name);
 			makeNewHost(name);
 		});
