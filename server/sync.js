@@ -11,9 +11,9 @@ var sockets = require('./sockets');
 /**
  * Fox Vars
  */
-String hostID = "";
-boolean isLocked = false;
-String[] users = new String[0];
+var hostID = "";
+var isLocked = false;
+var users = [];
 
 /**
  * Socket events.
