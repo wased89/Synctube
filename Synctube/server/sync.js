@@ -8,12 +8,11 @@ var datastore = require('./datastore');
 var safesocket = require('safesocket');
 var sockets = require('./sockets');
 
-/**
- * Fox Vars
- */
-String hostID = "";
+/*
+  * Fox Vars
+*/
+String hostID = null;
 boolean isLocked = false;
-String[] users = new String[0];
 
 /**
  * Socket events.
@@ -49,13 +48,9 @@ sockets.on('listen', function (io) {
 	function join (socket, name) {
 
 		socket.join(name);
-		
-		users.push(socket.id);
-		
+
 		socket.on('disconnect', function () {
-			users.splice(users.indexOf(socket.id), 1;
 			datastore.leave(name);
-			makeNewHost();
 		});
 
 		socket.on('add', safesocket(1, function (id, callback) {
@@ -102,7 +97,7 @@ sockets.on('listen', function (io) {
 		socket.on('lock', safesocket(0, function (callback)
 		{
 			if(socket.id == hostID) { isLocked = !isLocked; }
-			else {return callback("Error: NotHost/Leader. Cannot lock room.");}
+			
 		}));
 		
 		async.parallel({
@@ -116,10 +111,6 @@ sockets.on('listen', function (io) {
 			socket.emit('users', result.users);
 		});
 
-	}
-	function makeNewHost()
-	{
-		hostID = users[0];
 	}
 
 });
