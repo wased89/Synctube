@@ -53,7 +53,7 @@ sockets.on('listen', function (io) {
 
 		socket.join(name);
 		
-		rooms[name]users.push(socket.id);
+		rooms[name].users.push(socket.id);
 		
 		socket.on('disconnect', function () {
 			rooms[name].splice(users.indexOf(socket.id), 1;
@@ -124,7 +124,7 @@ sockets.on('listen', function (io) {
 	}
 	function makeNewHost(name)
 	{
-		hostID = rooms[name]users[0];
+		hostID = rooms[name].users[0];
 	}
 
 });
