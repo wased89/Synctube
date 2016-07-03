@@ -34,6 +34,7 @@ sockets.on('listen', function (io) {
 		} else if (event == 'remove') {
 			io.sockets.in(room).emit('remove', args[0]);
 		}
+		console.log("Room was created");
 	});
 
 	datastore.on('users', function (room, count) {
