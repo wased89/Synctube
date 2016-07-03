@@ -11,9 +11,7 @@ var sockets = require('./sockets');
 /**
  * Fox Vars
  */
-var hostID = "";
-var isLocked = false;
-var users = [];
+var rooms = {};
 
 /**
  * Socket events.
@@ -22,6 +20,11 @@ var users = [];
 sockets.on('listen', function (io) {
 
 	datastore.on('room', function (room, event, args) {
+		
+		rooms[room].hostID = "";
+		rooms[room].isLocked = false;
+		rooms[room].users = [];
+		
 		if (event == 'state') {
 			io.sockets.in(room).emit('state', args[0]);
 		} else if (event == 'put') {
@@ -50,40 +53,40 @@ sockets.on('listen', function (io) {
 
 		socket.join(name);
 		
-		users.push(socket.id);
+		rooms[name]users.push(socket.id);
 		
 		socket.on('disconnect', function () {
-			users.splice(users.indexOf(socket.id), 1;
+			rooms[name].splice(users.indexOf(socket.id), 1;
 			datastore.leave(name);
-			makeNewHost();
+			makeNewHost(name);
 		});
 
 		socket.on('add', safesocket(1, function (id, callback) {
 			youtube.getVideoLength(id, function (err, length) {
 				if (err) { return callback(err); }
-				if (isLocked) { return callback("Error: Locked Room Error"); }
+				if (rooms[name].isLocked) { return callback("Error: Locked Room Error"); }
 				var video = { id: id, length: length };
 				datastore.addVideo(name, video, callback);
 			});
 		}));
 
 		socket.on('delete', safesocket(1, function (key, callback) {
-			if (isLocked) { return callback("Error: Locked Room Error"); }
+			if (rooms[name].isLocked) { return callback("Error: Locked Room Error"); }
 			datastore.deleteVideo(name, key, callback);
 		}));
 
 		socket.on('move', safesocket(2, function (key, beforeKey, callback) {
-			if (isLocked) { return callback("Error: Locked Room Error"); }
+			if (rooms[name].isLocked) { return callback("Error: Locked Room Error"); }
 			datastore.moveVideo(name, key, beforeKey, callback);
 		}));
 
 		socket.on('shuffle', safesocket(0, function (callback) {
-			if (isLocked) { return callback("Error: Locked Room Error"); }
+			if (rooms[name].isLocked) { return callback("Error: Locked Room Error"); }
 			datastore.shufflePlaylist(name, callback);
 		}));
 
 		socket.on('cue', safesocket(1, function (key, callback) {
-			if (isLocked) { return callback("Error: Locked Room Error"); }
+			if (rooms[name].isLocked) { return callback("Error: Locked Room Error"); }
 			datastore.playVideo(name, key, callback);
 		}));
 
@@ -101,7 +104,7 @@ sockets.on('listen', function (io) {
 		
 		socket.on('lock', safesocket(0, function (callback)
 		{
-			if(socket.id == hostID) { isLocked = !isLocked; }
+			if(socket.id == hostID) { rooms[name].isLocked = !rooms[name].isLocked; }
 			else {return callback("Error: NotHost/Leader. Cannot lock room.");}
 		}));
 		
@@ -115,11 +118,13 @@ sockets.on('listen', function (io) {
 			socket.emit('state', result.state);
 			socket.emit('users', result.users);
 		});
+		
+		makeNewHost(name);
 
 	}
-	function makeNewHost()
+	function makeNewHost(name)
 	{
-		hostID = users[0];
+		hostID = rooms[name]users[0];
 	}
 
 });
