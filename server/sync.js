@@ -11,7 +11,6 @@ var sockets = require('./sockets');
 /**
  * Fox Vars
  */
-var rooms = {};
 
 /**
  * Socket events.
@@ -109,9 +108,5 @@ sockets.on('listen', function (io) {
 		
 		makeNewHost(name);
 
-	}
-	function makeNewHost(name)
-	{
-		hostID = rooms[name].users[0];
 	}
 });
