@@ -11,7 +11,7 @@ var sockets = require('./sockets');
 /**
  * Fox Vars
  */
- var rooms = []; //the list of rooms
+ var rooms = {}; //the list of rooms
  //the room object(inside rooms), has a list of users(by ID), and isLocked var 
  
 /**
@@ -21,10 +21,13 @@ var sockets = require('./sockets');
 sockets.on('listen', function (io) {
 
 	datastore.on('room', function (room, event, args) {
-		rooms.push({
-			users: [];
-			isLocked: false;
-		});
+		
+		rooms[room] = 
+		{
+			users: [],
+			isLocked: false,
+			mainUser: null
+		};
 		
 		if (event == 'state') {
 			io.sockets.in(room).emit('state', args[0]);
@@ -51,11 +54,26 @@ sockets.on('listen', function (io) {
 	});
 
 	function join (socket, name) {
-
+		if(rooms[name] == undefined)
+		{
+			rooms[name] = 
+			{
+			users: [],
+			isLocked: false,
+			mainUser: null
+			};
+		}
+		
 		socket.join(name);
 		
+		if(rooms[name].users.length == 0)
+		{ rooms[name].mainUser = socket.id;}
+		rooms[name].users.push(socket.id);
+		
 		socket.on('disconnect', function () {
+			rooms[name].users.pop(socket.id);
 			datastore.leave(name);
+			updateMainUser(name);
 		});
 
 		socket.on('add', safesocket(2, function (type, id, callback) {
@@ -87,19 +105,21 @@ sockets.on('listen', function (io) {
 		}));
 
 		socket.on('play', safesocket(0, function (callback) {
+			if(isLocked(name)){callback("Room is locked"); return;}
 			datastore.setPlaying(name, true, callback);
 		}));
 
 		socket.on('pause', safesocket(0, function (callback) {
+			if(isLocked(name)){callback("Room is locked"); return;}
 			datastore.setPlaying(name, false, callback);
 		}));
 		socket.on('lock', safesocket(0, function(callback) {
-			if(isLocked){return;}
-			if(isMainUser){lock();}
+			if(isLocked(name)){return;}
+			if(socket.id == rooms[name].mainUser){toggleLock(name);}
 		}))
 		socket.on('unlock', safesocket(0, function(callback){
-			if(!isLocked){return;}
-			if(isMainUser){unlock();}
+			if(!isLocked(name)){return;}
+			if(socket.id == rooms[name].mainUser){toggleLock(name);}
 		}))
 
 		async.parallel({
@@ -112,7 +132,19 @@ sockets.on('listen', function (io) {
 			socket.emit('state', result.state);
 			socket.emit('users', result.users);
 		});
-
 	}
-
+	function updateMainUser(room)
+	{
+		if(rooms[room].users.length == 0) 
+		{rooms[room].mainUser = null;}
+		rooms[room].mainUser = rooms[room].users[0];
+	}
+	function toggleLock(room)
+	{
+		rooms[room].isLocked = !rooms[room].isLocked;
+	}
+	function isLocked(room)
+	{
+		return rooms[room].isLocked;
+	}
 });

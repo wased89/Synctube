@@ -181,5 +181,11 @@ Sync.prototype.play = function () {
 Sync.prototype.pause = function () {
 	socket.emit('pause');
 };
+Sync.prototype.lock = function () {
+	socket.emit('lock');
+};
+Sync.prototype.unlock = function () {
+	socket.emit('unlock');
+};
 
 var sync = module.exports = exports = new Sync();
