@@ -12,6 +12,9 @@
     <div class="col-lg-8 col-lg-push-2 col-sm-12
 	  <label for="Currently_Playing"> Currently Playing: 
 	  </label>
+	  <div data-bind="with: playlist">
+		<label data-bind="text: currentVideoTitle()"> </label>
+	  </div>
       <div class="embed-responsive embed-responsive-16by9">
         <div class="embed-responsive-item">
           <video class="videojs vjs-default-skin" id="player" controls autoplay></video>
@@ -45,11 +48,11 @@
 	  <div data-bind="with: controls">
 		<div>
           <button class="btn btn-default btn-block" data-bind="click: lockunlock">
-            <!-- ko if: playing() -->
-            <span class="glyphicon glyphicon-pause" aria-hidden="true"></span> Lock
+            <!-- ko if: isLocked() -->
+            <span class="glyphicon glyphicon-pause" aria-hidden="true"></span> Unlock
             <!-- /ko -->
-            <!-- ko ifnot: playing() -->
-            <span class="glyphicon glyphicon-play" aria-hidden="true"></span> Unlock
+            <!-- ko ifnot: isLocked() -->
+            <span class="glyphicon glyphicon-play" aria-hidden="true"></span> Lock
             <!-- /ko -->
           </button>
         </div>

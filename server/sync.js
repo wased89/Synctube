@@ -54,7 +54,7 @@ sockets.on('listen', function (io) {
 	});
 
 	function join (socket, name) {
-		if(rooms[name] == undefined)
+		if(rooms.getname == undefined)
 		{
 			rooms[name] = 
 			{
@@ -69,7 +69,7 @@ sockets.on('listen', function (io) {
 		if(rooms[name].users.length == 0)
 		{ rooms[name].mainUser = socket.id;}
 		rooms[name].users.push(socket.id);
-		
+		updateMainUser(name;
 		socket.on('disconnect', function () {
 			rooms[name].users.pop(socket.id);
 			datastore.leave(name);
@@ -136,7 +136,7 @@ sockets.on('listen', function (io) {
 	function updateMainUser(room)
 	{
 		if(rooms[room].users.length == 0) 
-		{rooms[room].mainUser = null;}
+		{rooms[room].mainUser = null; return;}
 		rooms[room].mainUser = rooms[room].users[0];
 	}
 	function toggleLock(room)

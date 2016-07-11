@@ -89,4 +89,6 @@ var playlist = module.exports = exports = new (function () {
 	self.shuffle = function () {
 		sync.shuffle();
 	};
+	self.currentVideoTitle = ko.computed(function () 
+	{ if(self.currentKey() != null){return entries.get(self.currentKey()).title();}});
 })();
