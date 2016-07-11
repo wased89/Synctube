@@ -36,3 +36,4 @@ static/*.css*
 # Environment
 
 .env
+startSynctube.sh

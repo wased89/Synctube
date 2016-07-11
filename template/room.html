@@ -9,7 +9,9 @@
 {+bodyContent}
 <div class="container-fluid">
   <div class="row">
-    <div class="col-lg-8 col-lg-push-2 col-sm-12">
+    <div class="col-lg-8 col-lg-push-2 col-sm-12
+	  <label for="Currently_Playing"> Currently Playing: 
+	  </label>
       <div class="embed-responsive embed-responsive-16by9">
         <div class="embed-responsive-item">
           <video class="videojs vjs-default-skin" id="player" controls autoplay></video>
@@ -40,6 +42,18 @@
           </button>
         </div>
       </div>
+	  <div data-bind="with: controls">
+		<div>
+          <button class="btn btn-default btn-block" data-bind="click: playpause">
+            <!-- ko if: playing() -->
+            <span class="glyphicon glyphicon-pause" aria-hidden="true"></span> Lock
+            <!-- /ko -->
+            <!-- ko ifnot: playing() -->
+            <span class="glyphicon glyphicon-play" aria-hidden="true"></span> Unlock
+            <!-- /ko -->
+          </button>
+        </div>
+	  </div>
       <div data-bind="with: users">
         <h6 class="text-muted text-center" data-bind="if: count">
           <span data-bind="text: count"></span> users here now
@@ -87,7 +101,8 @@
     <div class="col-lg-2 col-sm-4" data-bind="with: playlist">
       <h6 class="text-muted">Playlist</h6>
       <button class="btn btn-default btn-xs btn-block" type="button" data-bind="click: shuffle"><span class="glyphicon glyphicon-random" aria-hidden="true"></span> Shuffle</button>
-      <div class="list-group" data-bind="foreach: entries">
+      <div id="" style="overflow-y:auto; height:640px;">
+	  <div class="list-group" data-bind="foreach: entries">
         <li class="list-group-item" data-bind="css: { active: isCurrent }">
           <div class="media" data-bind="if: title()">
             <div class="btn-group-vertical playlist-item-buttons" role="group" aria-label="...">
@@ -112,6 +127,7 @@
           </div>
         </li>
       </div>
+	  </div>
     </div>
   </div>
 </div>

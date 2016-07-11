@@ -11,7 +11,9 @@ var sockets = require('./sockets');
 /**
  * Fox Vars
  */
-
+ var rooms = []; //the list of rooms
+ //the room object(inside rooms), has a list of users(by ID), and isLocked var 
+ 
 /**
  * Socket events.
  */
@@ -19,10 +21,10 @@ var sockets = require('./sockets');
 sockets.on('listen', function (io) {
 
 	datastore.on('room', function (room, event, args) {
-		
-		rooms[room].hostID = "";
-		rooms[room].isLocked = false;
-		rooms[room].users = [];
+		rooms.push({
+			users: [];
+			isLocked: false;
+		});
 		
 		if (event == 'state') {
 			io.sockets.in(room).emit('state', args[0]);
@@ -52,10 +54,8 @@ sockets.on('listen', function (io) {
 
 		socket.join(name);
 		
-		
 		socket.on('disconnect', function () {
 			datastore.leave(name);
-			makeNewHost(name);
 		});
 
 		socket.on('add', safesocket(2, function (type, id, callback) {
@@ -93,7 +93,14 @@ sockets.on('listen', function (io) {
 		socket.on('pause', safesocket(0, function (callback) {
 			datastore.setPlaying(name, false, callback);
 		}));
-		
+		socket.on('lock', safesocket(0, function(callback) {
+			if(isLocked){return;}
+			if(isMainUser){lock();}
+		}))
+		socket.on('unlock', safesocket(0, function(callback){
+			if(!isLocked){return;}
+			if(isMainUser){unlock();}
+		}))
 
 		async.parallel({
 			playlist: async.apply(datastore.getPlaylist, name),
@@ -105,8 +112,7 @@ sockets.on('listen', function (io) {
 			socket.emit('state', result.state);
 			socket.emit('users', result.users);
 		});
-		
-		makeNewHost(name);
 
 	}
+
 });

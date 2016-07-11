@@ -23,6 +23,18 @@ module.exports = exports = new (function () {
 			sync.play();
 		}
 	};
+	self.lockunlock = function () 
+	{
+		if(self.isLocked())
+		{
+			sync.unlock();
+		}
+		else
+		{
+			sync.lock();
+		}
+	}
+	self.isLocked = ko.observable(false);
 	self.playing = ko.observable(false);
 	sync.on('state', function (state) {
 		self.playing(state.playing);
