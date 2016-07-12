@@ -70,7 +70,18 @@ socket.on('connect', function () {
 	socket.on('users', function (count) {
 		sync.emit('users', count);
 	});
-
+	
+	/**
+	 * Foxstuff
+	 */
+	 
+	socket.on('lock', function(){
+		sync.on('lock');
+	})
+	socket.on('unlock', function(){
+		sync.on('unlock');
+	})
+	 
 	/**
 	 * Join room.
 	 */
