@@ -76,10 +76,10 @@ socket.on('connect', function () {
 	 */
 	 
 	socket.on('lock', function(){
-		sync.on('lock');
+		sync.emit('lock');
 	})
 	socket.on('unlock', function(){
-		sync.on('unlock');
+		sync.emit('unlock');
 	})
 	 
 	/**
