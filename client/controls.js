@@ -39,4 +39,10 @@ module.exports = exports = new (function () {
 	sync.on('state', function (state) {
 		self.playing(state.playing);
 	});
+	sync.on('lock', function (){
+		self.isLocked(true);
+	});
+	sync.on('unlock', function (){
+		self.isLocked(false);
+	})
 })();

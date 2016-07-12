@@ -38,6 +38,14 @@ sockets.on('listen', function (io) {
 		} else if (event == 'remove') {
 			io.sockets.in(room).emit('remove', args[0]);
 		}
+		else if(event == "lock")
+		{
+			io.sockets.in(room).emit('lock');
+		}
+		else if(event == "unlock")
+		{
+			io.sockets.in(room).emit('unlock');
+		}
 	});
 
 	datastore.on('users', function (room, count) {
@@ -54,7 +62,7 @@ sockets.on('listen', function (io) {
 	});
 
 	function join (socket, name) {
-		if(rooms.getname == undefined)
+		if(rooms[name] == undefined)
 		{
 			rooms[name] = 
 			{
@@ -69,7 +77,7 @@ sockets.on('listen', function (io) {
 		if(rooms[name].users.length == 0)
 		{ rooms[name].mainUser = socket.id;}
 		rooms[name].users.push(socket.id);
-		updateMainUser(name;
+		updateMainUser(name);
 		socket.on('disconnect', function () {
 			rooms[name].users.pop(socket.id);
 			datastore.leave(name);
@@ -115,11 +123,11 @@ sockets.on('listen', function (io) {
 		}));
 		socket.on('lock', safesocket(0, function(callback) {
 			if(isLocked(name)){return;}
-			if(socket.id == rooms[name].mainUser){toggleLock(name);}
+			if(socket.id == rooms[name].mainUser){toggleLock(name, true);}
 		}))
 		socket.on('unlock', safesocket(0, function(callback){
 			if(!isLocked(name)){return;}
-			if(socket.id == rooms[name].mainUser){toggleLock(name);}
+			if(socket.id == rooms[name].mainUser){toggleLock(name, false);}
 		}))
 
 		async.parallel({
@@ -139,9 +147,9 @@ sockets.on('listen', function (io) {
 		{rooms[room].mainUser = null; return;}
 		rooms[room].mainUser = rooms[room].users[0];
 	}
-	function toggleLock(room)
+	function toggleLock(room, islocked)
 	{
-		rooms[room].isLocked = !rooms[room].isLocked;
+		rooms[room].isLocked = islocked;
 	}
 	function isLocked(room)
 	{
