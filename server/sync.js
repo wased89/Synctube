@@ -38,14 +38,6 @@ sockets.on('listen', function (io) {
 		} else if (event == 'remove') {
 			io.sockets.in(room).emit('remove', args[0]);
 		}
-		else if(event == "lock")
-		{
-			io.sockets.in(room).emit('lock');
-		}
-		else if(event == "unlock")
-		{
-			io.sockets.in(room).emit('unlock');
-		}
 	});
 
 	datastore.on('users', function (room, count) {
@@ -124,10 +116,12 @@ sockets.on('listen', function (io) {
 		socket.on('lock', safesocket(0, function(callback) {
 			if(isLocked(name)){return;}
 			if(socket.id == rooms[name].mainUser){toggleLock(name, true);}
+			io.sockets.in(name).emit('lock');
 		}))
 		socket.on('unlock', safesocket(0, function(callback){
 			if(!isLocked(name)){return;}
 			if(socket.id == rooms[name].mainUser){toggleLock(name, false);}
+			io.sockets.in(room).emit('unlock');
 		}))
 
 		async.parallel({
