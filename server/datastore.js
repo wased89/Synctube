@@ -181,6 +181,8 @@ Datastore.prototype.leave = function (room, cb) {
 		'rooms:counts',
 		'rooms:timeouts',
 	], [room, getTime()], wrap(cb));
+	if(getUserCount(room, cb) == 0)
+		setPlaying(room, false, cb);
 };
 
 Datastore.prototype.getUserCount = function (room, cb) {
