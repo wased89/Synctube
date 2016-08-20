@@ -91,6 +91,7 @@ Datastore.prototype.getState = function (room, cb) {
 };
 
 Datastore.prototype.deleteRoom = function (room, cb) {
+	if(!room == "kpop")
 	scripts.run('hashlist', getKeys(room), [eventsChannel, room, 'deleteRoom', getTime()], wrap(cb));
 };
 
